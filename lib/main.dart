@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:costumer_project/navPage.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_ml_vision/google_ml_vision.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:get/get.dart';
+
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,6 +25,10 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  String cameraResult = 'Scanner results';
+  String searchResult = 'Search results';
+  String displayText = '';
+
   static String result = '';
   List<String> resultElements = [];
   File? imageFile;
@@ -37,6 +41,7 @@ class _MyAppState extends State<MyApp> {
   final TextEditingController controller = TextEditingController();
 
   pickImageFromCamera() async {
+    controller.clear();
     image = await _picker.pickImage(source: ImageSource.gallery);
     imageFile = File(image!.path);
     setState(() {
@@ -69,6 +74,7 @@ class _MyAppState extends State<MyApp> {
       }
     });
     setState(() {});
+    displayText = cameraResult;
     print(result);
   }
 
@@ -104,7 +110,7 @@ class _MyAppState extends State<MyApp> {
                     Padding(
                       padding: const EdgeInsets.only(left: 20, bottom: 10),
                       child: Text(
-                        'Whats in it',
+                        'What\'s in it',
                         style: GoogleFonts.raleway(
                             fontSize: 40, fontWeight: FontWeight.bold),
                       ),
@@ -171,10 +177,17 @@ class _MyAppState extends State<MyApp> {
               const Gap(0),
               Padding(
                 padding: const EdgeInsets.only(
-                    left: 20, top: 10, right: 10, bottom: 10),
+                    left: 20, top: 5, right: 10, bottom: 0),
                 child: Text('Ingredients',
                     style: GoogleFonts.raleway(
                         fontSize: 20, fontWeight: FontWeight.bold)),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 20, top: 5, right: 10, bottom: 5),
+                child: Text(displayText,
+                    style: GoogleFonts.raleway(
+                        fontSize: 14, fontWeight: FontWeight.w500)),
               ),
               StreamBuilder<QuerySnapshot>(
                 stream:
@@ -193,7 +206,13 @@ class _MyAppState extends State<MyApp> {
                                 itemBuilder: (context, index) {
                                   var data = snapshots.data!.docs[index].data()
                                       as Map<String, dynamic>;
-                                  if (!name.isEmpty && data['name'].toString().toLowerCase().startsWith(name.toLowerCase())) {
+                                  if (name.isNotEmpty &&
+                                      data['name']
+                                          .toString()
+                                          .toLowerCase()
+                                          .startsWith(name.toLowerCase())) {
+                                    displayText = searchResult;
+
                                     print('arama ile gelenler');
                                     return ListTile(
                                       minVerticalPadding: 15,
@@ -211,30 +230,31 @@ class _MyAppState extends State<MyApp> {
                                                   color: Colors.grey
                                                       .withOpacity(0.5))
                                             ],
-                                            color: const Color(0xff2F84F1),
+                                            color: Color.fromARGB(
+                                                255, 243, 243, 243),
                                             borderRadius:
                                                 const BorderRadius.only(
                                                     topLeft:
-                                                        Radius.circular(15),
+                                                        Radius.circular(10),
                                                     topRight:
-                                                        Radius.circular(15))),
+                                                        Radius.circular(10))),
                                         child: Padding(
                                           padding: const EdgeInsets.only(
-                                              top: 0, left: 5, bottom: 5),
+                                              top: 0, left: 0, bottom: 5),
                                           child: Text(
                                             data['name'],
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: GoogleFonts.raleway(
-                                                color: Colors.white,
+                                                color: Colors.black,
                                                 fontSize: 18,
-                                                fontWeight: FontWeight.bold),
+                                                fontWeight: FontWeight.w600),
                                           ),
                                         ),
                                       ),
                                       subtitle: Container(
                                         padding: const EdgeInsets.only(
-                                            top: 10, bottom: 10, left: 20),
+                                            top: 0, bottom: 0, left: 10),
                                         decoration: BoxDecoration(
                                             boxShadow: [
                                               BoxShadow(
@@ -246,9 +266,9 @@ class _MyAppState extends State<MyApp> {
                                             color: Color.fromARGB(
                                                 255, 255, 255, 255),
                                             borderRadius: BorderRadius.only(
-                                                bottomLeft: Radius.circular(15),
+                                                bottomLeft: Radius.circular(10),
                                                 bottomRight:
-                                                    Radius.circular(15))),
+                                                    Radius.circular(10))),
                                         child: Row(
                                           children: [
                                             Column(
@@ -267,9 +287,7 @@ class _MyAppState extends State<MyApp> {
                                                             : Colors.green),
                                                     Gap(5),
                                                     Text(
-                                                      'Kosher : ' +
-                                                          data['Kosher']
-                                                              .toString(),
+                                                      'Kosher',
                                                       style:
                                                           GoogleFonts.raleway(
                                                               color:
@@ -290,10 +308,7 @@ class _MyAppState extends State<MyApp> {
                                                                 ? Colors.red
                                                                 : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Free Form : ' +
-                                                            data['Free Form']
-                                                                .toString(),
+                                                    Text('Free Form',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
@@ -311,8 +326,7 @@ class _MyAppState extends State<MyApp> {
                                                             ? Colors.red
                                                             : Colors.green),
                                                     const Gap(5),
-                                                    Text(
-                                                        'Halal : ${data['Halal']}',
+                                                    Text('Halal',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
@@ -330,10 +344,7 @@ class _MyAppState extends State<MyApp> {
                                                             ? Colors.red
                                                             : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Vegan : ' +
-                                                            data['Vegan']
-                                                                .toString(),
+                                                    Text('Vegan',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
@@ -353,10 +364,7 @@ class _MyAppState extends State<MyApp> {
                                                                 ? Colors.red
                                                                 : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Vegeterian : ' +
-                                                            data['Vegeterian']
-                                                                .toString(),
+                                                    Text('Vegeterian',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 fontWeight:
@@ -377,10 +385,7 @@ class _MyAppState extends State<MyApp> {
                                                             ? Colors.red
                                                             : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Helal : ' +
-                                                            data['Helal']
-                                                                .toString(),
+                                                    Text('Helal',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
@@ -392,10 +397,16 @@ class _MyAppState extends State<MyApp> {
                                           ],
                                         ),
                                       ),
-                                    );;
-                                  } 
-                                  if (name.isEmpty &&result.toLowerCase().contains(
-                                      data['name'].toString().toLowerCase())) {
+                                    );
+                                  }
+                                  if (name.isEmpty &&
+                                      result.isNotEmpty &&
+                                      result.toLowerCase().contains(data['name']
+                                          .toString()
+                                          .toLowerCase())) {
+                                    print('kamera ile gelenler');
+
+                                    //name = '';
                                     return ListTile(
                                       minVerticalPadding: 15,
                                       title: Container(
@@ -412,7 +423,8 @@ class _MyAppState extends State<MyApp> {
                                                   color: Colors.grey
                                                       .withOpacity(0.5))
                                             ],
-                                            color: const Color(0xff2F84F1),
+                                            color: Color.fromARGB(
+                                                255, 243, 243, 243),
                                             borderRadius:
                                                 const BorderRadius.only(
                                                     topLeft:
@@ -427,7 +439,7 @@ class _MyAppState extends State<MyApp> {
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                             style: GoogleFonts.raleway(
-                                                color: Colors.white,
+                                                color: Colors.black,
                                                 fontSize: 18,
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -468,9 +480,7 @@ class _MyAppState extends State<MyApp> {
                                                             : Colors.green),
                                                     Gap(5),
                                                     Text(
-                                                      'Kosher : ' +
-                                                          data['Kosher']
-                                                              .toString(),
+                                                      'Kosher',
                                                       style:
                                                           GoogleFonts.raleway(
                                                               color:
@@ -491,10 +501,7 @@ class _MyAppState extends State<MyApp> {
                                                                 ? Colors.red
                                                                 : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Free Form : ' +
-                                                            data['Free Form']
-                                                                .toString(),
+                                                    Text('Free Form',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
@@ -512,8 +519,7 @@ class _MyAppState extends State<MyApp> {
                                                             ? Colors.red
                                                             : Colors.green),
                                                     const Gap(5),
-                                                    Text(
-                                                        'Halal : ${data['Halal']}',
+                                                    Text('Halal',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
@@ -531,10 +537,7 @@ class _MyAppState extends State<MyApp> {
                                                             ? Colors.red
                                                             : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Vegan : ' +
-                                                            data['Vegan']
-                                                                .toString(),
+                                                    Text('Vegan',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
@@ -554,10 +557,7 @@ class _MyAppState extends State<MyApp> {
                                                                 ? Colors.red
                                                                 : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Vegeterian : ' +
-                                                            data['Vegeterian']
-                                                                .toString(),
+                                                    Text('Vegeterian',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 fontWeight:
@@ -578,10 +578,7 @@ class _MyAppState extends State<MyApp> {
                                                             ? Colors.red
                                                             : Colors.green),
                                                     Gap(5),
-                                                    Text(
-                                                        'Helal : ' +
-                                                            data['Helal']
-                                                                .toString(),
+                                                    Text('Helal',
                                                         style:
                                                             GoogleFonts.raleway(
                                                                 color: Colors
