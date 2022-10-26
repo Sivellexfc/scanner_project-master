@@ -195,7 +195,10 @@ class _MyAppState extends State<MyApp> {
                 builder: (context, snapshots) {
                   return (snapshots.connectionState == ConnectionState.waiting)
                       ? const Center(
-                          child: CircularProgressIndicator(),
+                          child: Padding(
+                            padding: EdgeInsets.only(top :100.0),
+                            child: CircularProgressIndicator(),
+                          ),
                         )
                       : Expanded(
                           child: SizedBox(
