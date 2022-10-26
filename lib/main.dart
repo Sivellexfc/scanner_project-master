@@ -8,7 +8,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:google_ml_vision/google_ml_vision.dart';
 import 'package:image_picker/image_picker.dart';
 
-
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -42,7 +41,7 @@ class _MyAppState extends State<MyApp> {
 
   pickImageFromCamera() async {
     controller.clear();
-    image = await _picker.pickImage(source: ImageSource.gallery);
+    image = await _picker.pickImage(source: ImageSource.camera);
     imageFile = File(image!.path);
     setState(() {
       image;
@@ -196,7 +195,7 @@ class _MyAppState extends State<MyApp> {
                   return (snapshots.connectionState == ConnectionState.waiting)
                       ? const Center(
                           child: Padding(
-                            padding: EdgeInsets.only(top :100.0),
+                            padding: EdgeInsets.only(top: 100.0),
                             child: CircularProgressIndicator(),
                           ),
                         )
